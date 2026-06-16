@@ -35,6 +35,18 @@ The platform is structured into core operational modules, easily navigated via t
 *   **Budgeting Integrity:** Compares real-time expenditures against projected project targets to flag overruns instantly.
 
 ---
+<img width="1885" height="827" alt="ca1" src="https://github.com/user-attachments/assets/4c00ce06-b6b7-414a-8afc-8870bd790c90" />
+
+
+<img width="1882" height="832" alt="ca2" src="https://github.com/user-attachments/assets/e1094a62-7203-4cb2-ab4f-5ecdd547e7c9" />
+
+
+<img width="1880" height="822" alt="ca4" src="https://github.com/user-attachments/assets/c8bfe97a-9081-4849-9103-6b3dab6e030f" />
+
+
+<img width="1891" height="823" alt="ca3" src="https://github.com/user-attachments/assets/68f538fe-21bc-4890-bccf-f77262ef343d" />
+
+
 
 ## 🛠️ Architecture & Technical Stack
 
