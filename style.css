@@ -1,0 +1,253 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    background: #1a252f;
+    color: white;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 22px;
+}
+
+.login-btn {
+    color: white;
+    text-decoration: none;
+    border: 1px solid white;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.login-btn:hover {
+    background: white;
+    color: #1a252f;
+}
+
+/* Hero */
+.hero {
+    background: #2c3e50;
+    color: white;
+    padding: 80px 5%;
+    text-align: center;
+}
+
+.hero h2 {
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.primary-btn {
+    background: #f39c12;
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.primary-btn:hover {
+    background: #d68910;
+}
+
+/* Features */
+.features {
+    display: flex;
+    justify-content: space-around;
+    padding: 60px 5%;
+    background: white;
+}
+
+.feature-card {
+    width: 30%;
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.feature-card h3 {
+    margin-bottom: 10px;
+    color: #1a252f;
+}
+
+/* Footer */
+.footer {
+    background: #1a252f;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+/* Login Page */
+.login-container {
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f4f4f4;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    width: 350px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.login-box h2 {
+    margin-bottom: 10px;
+    color: #1a252f;
+    text-align: center;
+}
+
+.login-box p {
+    margin-bottom: 25px;
+    text-align: center;
+    color: #666;
+}
+
+.login-box label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.full-width {
+    width: 100%;
+    text-align: center;
+}
+
+/* Dashboard */
+.dashboard {
+    padding: 40px 5%;
+    background: #f4f4f4;
+    min-height: 70vh;
+}
+
+.dashboard h2 {
+    margin-bottom: 5px;
+    color: #1a252f;
+}
+
+.dashboard p {
+    margin-bottom: 25px;
+    color: #555;
+}
+
+/* Table */
+.table-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #1a252f;
+    color: white;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+}
+
+tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+/* Status tags */
+.status {
+    font-weight: bold;
+}
+
+.status.ongoing {
+    color: #f39c12;
+}
+
+.status.completed {
+    color: green;
+}
+
+.status.delayed {
+    color: red;
+}
+
+/* Edit Button */
+.edit-btn {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background: #1a252f;
+}
+
+/* Edit Project */
+.edit-container {
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f4f4f4;
+}
+
+.edit-box {
+    background: white;
+    padding: 40px;
+    width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.edit-box label {
+    font-weight: bold;
+    margin-top: 15px;
+    display: block;
+}
+
+.edit-box input,
+.edit-box select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}

@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildCore — Construction Management</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --bg2: #111318;
+    --bg3: #1a1d24;
+    --surface: #1e2229;
+    --border: #2a2f3a;
+    --accent: #f5a623;
+    --accent2: #e8562a;
+    --text: #e8eaf0;
+    --muted: #7a8190;
+    --success: #2dd47a;
+    --danger: #f04848;
+    --r: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── AUTH ── */
+  #auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .auth-left {
+    flex: 1;
+    background: linear-gradient(135deg, #0f1117 0%, #1a1008 50%, #0f1117 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-left::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+    top: -100px; left: -100px;
+    pointer-events: none;
+  }
+
+  .auth-left::after {
+    content: 'BUILD\ACORE';
+    white-space: pre;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 120px;
+    line-height: 0.9;
+    color: rgba(245,166,35,0.06);
+    position: absolute;
+    right: -20px;
+    bottom: 40px;
+    pointer-events: none;
+  }
+
+  .auth-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .auth-tagline {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 340px;
+    line-height: 1.6;
+  }
+
+  .auth-stats {
+    margin-top: 60px;
+    display: flex;
+    gap: 40px;
+  }
+
+  .auth-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--accent);
+  }
+
+  .auth-stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .auth-right {
+    width: 480px;
+    background: var(--bg2);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 50px;
+    border-left: 1px solid var(--border);
+  }
+
+  .auth-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .auth-subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: var(--r);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .form-group select option { background: var(--bg3); }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: var(--r);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-primary:hover { background: #e09820; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-top: 12px;
+  }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-sm {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-success { background: var(--success); color: #000; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .auth-toggle {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .auth-toggle a {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .auth-error {
+    background: rgba(240,72,72,0.1);
+    border: 1px solid rgba(240,72,72,0.3);
+    color: var(--danger);
+    padding: 12px 16px;
+    border-radius: var(--r);
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  /* ── APP SHELL ── */
+  #app { display: none; min-height: 100vh; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar {
+    height: 64px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-right: 8px;
+  }
+
+  nav {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .nav-btn {
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all .2s;
+    letter-spacing: .3px;
+  }
+
+  .nav-btn:hover { color: var(--text); background: var(--bg3); }
+  .nav-btn.active { color: var(--accent); background: rgba(245,166,35,0.1); }
+
+  .user-badge {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-email {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .logout-btn {
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all .2s;
+  }
+
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; padding: 32px; }
+
+  .page { display: none; animation: fadeIn .3s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .page-title span { color: var(--accent); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  /* ── STAT CARDS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .stat-card.danger::before { background: var(--danger); }
+  .stat-card.success::before { background: var(--success); }
+  .stat-card.blue::before { background: #4f8ef7; }
+
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    letter-spacing: 1px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead { background: var(--bg3); }
+
+  th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(42,47,58,0.5);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(245,166,35,0.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+
+  .badge-planned { background: rgba(79,142,247,0.15); color: #4f8ef7; }
+  .badge-active { background: rgba(45,212,122,0.15); color: var(--success); }
+  .badge-completed { background: rgba(122,129,144,0.15); color: var(--muted); }
+  .badge-available { background: rgba(45,212,122,0.15); color: var(--success); }
+  .badge-unavailable { background: rgba(240,72,72,0.15); color: var(--danger); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 90%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn .3s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color .2s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ── DASHBOARD ── */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(42,47,58,0.5);
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .activity-text { font-size: 13px; color: var(--text); }
+  .activity-time { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  /* ── PAYROLL+EXPENSE SPLIT ── */
+  .split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 14px;
+    z-index: 999;
+    display: none;
+    animation: toastIn .3s ease;
+    max-width: 320px;
+  }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #toast.success { border-color: var(--success); color: var(--success); }
+  #toast.error { border-color: var(--danger); color: var(--danger); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .section-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+  }
+
+  .total-row td {
+    font-weight: 700;
+    background: rgba(245,166,35,0.05);
+    color: var(--accent);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH SCREEN ── -->
+<div id="auth-screen">
+  <div class="auth-left">
+    <div class="auth-logo">⬡ BuildCore</div>
+    <p class="auth-tagline">Complete construction project management — from ground to finish.</p>
+    <div class="auth-stats">
+      <div>
+        <div class="auth-stat-num">24/7</div>
+        <div class="auth-stat-label">Monitoring</div>
+      </div>
+      <div>
+        <div class="auth-stat-num">100%</div>
+        <div class="auth-stat-label">Secure</div>
+      </div>
+      <div>
+        <div class="auth-stat-num" style="font-size:28px;letter-spacing:0">Unlimited</div>
+        <div class="auth-stat-label">Projects</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div id="login-form">
+      <div class="auth-title">Welcome Back</div>
+      <div class="auth-subtitle">Sign in to your BuildCore account</div>
+      <div id="auth-error" class="auth-error"></div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" onclick="login()">Sign In</button>
+      <div class="auth-toggle" style="margin-top:20px;font-size:12px;color:var(--muted)">
+        🔒 Access restricted to authorized personnel only
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">⬡ BuildCore</div>
+    <nav>
+      <button class="nav-btn active" onclick="showPage('dashboard',this)">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('projects',this)">Projects</button>
+      <button class="nav-btn" onclick="showPage('workers',this)">Workers</button>
+      <button class="nav-btn" onclick="showPage('machinery',this)">Machinery</button>
+      <button class="nav-btn" onclick="showPage('materials',this)">Materials</button>
+      <button class="nav-btn" onclick="showPage('managers',this)">Managers</button>
+      <button class="nav-btn" onclick="showPage('finance',this)">Finance</button>
+    </nav>
+    <div class="user-badge">
+      <span class="user-email" id="user-email-display"></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div class="page-title">DASH<span>BOARD</span></div>
+      </div>
+      <div class="stats-grid" id="dash-stats"></div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-title">Recent Projects</div>
+          <div id="recent-projects"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Quick Overview</div>
+          <div id="quick-overview"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div id="page-projects" class="page">
+      <div class="page-header">
+        <div class="page-title">PRO<span>JECTS</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('project-modal')">+ New Project</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Project Name</th><th>Status</th>
+              <th>Start Date</th><th>End Date</th><th>Budget</th>
+              <th>Manager</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projects-tbody"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROJECT DETAIL -->
+    <div id="page-project-detail" class="page">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:16px">
+          <button class="btn btn-sm btn-outline" onclick="showPage('projects', document.querySelector('.nav-btn:nth-child(2)'))">← Back</button>
+          <div class="page-title" id="detail-title">PROJECT <span>DETAIL</span></div>
+        </div>
+      </div>
+      <!-- Project info bar -->
+      <div class="stats-grid" id="detail-stats" style="margin-bottom:28px"></div>
+      <!-- Three sections -->
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <!-- Workers -->
+        <div class="card">
+          <div class="card-title">👷 Workers Assigned</div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Daily Wage</th><th>Days</th><th>Total Paid</th><th>Phone</th></tr></thead>
+              <tbody id="detail-workers-tbody"><tr><td colspan="7" class="empty-state">No workers assigned</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Machinery -->
+        <div class="card">
+          <div class="card-title">🏗️ Machinery Assigned</div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>ID</th><th>Machine Name</th><th>Type</th><th>Status</th></tr></thead>
+              <tbody id="detail-machinery-tbody"><tr><td colspan="4" class="empty-state">No machinery assigned</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Materials -->
+        <div class="card">
+          <div class="card-title">🧱 Materials Assigned</div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>ID</th><th>Material</th><th>Type</th><th>Unit Cost</th><th>Quantity</th><th>Total Value</th></tr></thead>
+              <tbody id="detail-materials-tbody"><tr><td colspan="6" class="empty-state">No materials assigned</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKERS -->
+    <div id="page-workers" class="page">
+      <div class="page-header">
+        <div class="page-title">WOR<span>KERS</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('worker-modal')">+ Add Worker</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Phone</th><th>Role</th>
+              <th>Daily Wage</th><th>Working Days</th><th>Total Paid</th><th>Project</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="workers-tbody"><tr><td colspan="9" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MACHINERY -->
+    <div id="page-machinery" class="page">
+      <div class="page-header">
+        <div class="page-title">MACH<span>INERY</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('machine-modal')">+ Add Machine</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Machine Name</th><th>Type</th><th>Project</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="machinery-tbody"><tr><td colspan="6" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MATERIALS -->
+    <div id="page-materials" class="page">
+      <div class="page-header">
+        <div class="page-title">MATE<span>RIALS</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('material-modal')">+ Add Material</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Material Name</th><th>Type</th><th>Project</th>
+              <th>Unit Cost</th><th>Quantity</th><th>Total Value</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="materials-tbody"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MANAGERS -->
+    <div id="page-managers" class="page">
+      <div class="page-header">
+        <div class="page-title">MANA<span>GERS</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('manager-modal')">+ Add Manager</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Phone</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="managers-tbody"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FINANCE (Payroll + Expense) -->
+    <div id="page-finance" class="page">
+      <div class="page-title" style="margin-bottom:8px">FIN<span style="color:var(--accent)">ANCE</span></div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:28px">Auto-calculated from worker wages, material costs and machinery per project</p>
+
+      <!-- Summary totals -->
+      <div class="stats-grid" style="margin-bottom:28px" id="finance-totals"></div>
+
+      <div class="split-grid">
+        <!-- PAYROLL SECTION -->
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:16px;color:var(--text)">PAYROLL <span style="font-size:13px;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:0;font-weight:400">— worker wages per project</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Project</th><th>Workers</th><th>Total Payroll</th><th>Detail</th></tr>
+              </thead>
+              <tbody id="payroll-tbody"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- EXPENSE SECTION -->
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:16px;color:var(--text)">EXPENSES <span style="font-size:13px;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:0;font-weight:400">— total cost per project</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Project</th><th>Payroll</th><th>Materials</th><th>Total</th><th>Detail</th></tr>
+              </thead>
+              <tbody id="expense-tbody"><tr><td colspan="5" class="empty-state">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYROLL DETAIL PAGE -->
+    <div id="page-payroll-detail" class="page">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:16px">
+          <button class="btn btn-sm btn-outline" onclick="showPage('finance', document.querySelector('.nav-btn:nth-child(7)'))">← Back</button>
+          <div class="page-title" id="payroll-detail-title">PAYROLL <span>DETAIL</span></div>
+        </div>
+      </div>
+      <div class="stats-grid" id="payroll-detail-stats" style="margin-bottom:24px"></div>
+      <div class="card">
+        <div class="card-title">Individual Worker Pay</div>
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead><tr><th>Worker ID</th><th>Name</th><th>Role</th><th>Daily Wage</th><th>Days Worked</th><th>Total Paid</th></tr></thead>
+            <tbody id="payroll-detail-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENSE DETAIL PAGE -->
+    <div id="page-expense-detail" class="page">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:16px">
+          <button class="btn btn-sm btn-outline" onclick="showPage('finance', document.querySelector('.nav-btn:nth-child(7)'))">← Back</button>
+          <div class="page-title" id="expense-detail-title">EXPENSE <span>DETAIL</span></div>
+        </div>
+      </div>
+      <div class="stats-grid" id="expense-detail-stats" style="margin-bottom:24px"></div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="card">
+          <div class="card-title">💰 Worker Payroll Breakdown</div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>Worker</th><th>Role</th><th>Days</th><th>Daily Wage</th><th>Amount</th></tr></thead>
+              <tbody id="exp-detail-workers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🧱 Material Costs Breakdown</div>
+          <div class="table-wrap" style="border:none">
+            <table>
+              <thead><tr><th>Material</th><th>Type</th><th>Unit Cost</th><th>Quantity</th><th>Total Value</th></tr></thead>
+              <tbody id="exp-detail-materials-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── MODALS ── -->
+
+<!-- Project Modal -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="project-modal-title">NEW PROJECT</div>
+      <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
+    </div>
+    <input type="hidden" id="project-edit-id">
+    <div class="form-group">
+      <label>Project Name</label>
+      <input type="text" id="proj-name" placeholder="Bridge Construction...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="proj-status">
+          <option>Planned</option><option>Active</option><option>Completed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Budget (₹)</label>
+        <input type="number" id="proj-budget" placeholder="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="proj-start">
+      </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input type="date" id="proj-end">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Manager</label>
+      <select id="proj-manager"><option value="">— Select Manager —</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+  </div>
+</div>
+
+<!-- Worker Modal -->
+<div class="modal-overlay" id="worker-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="worker-modal-title">ADD WORKER</div>
+      <button class="modal-close" onclick="closeModal('worker-modal')">✕</button>
+    </div>
+    <input type="hidden" id="worker-edit-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Worker ID <span style="color:var(--muted);font-size:10px">(auto if blank)</span></label>
+        <input type="number" id="w-id" placeholder="e.g. 104">
+      </div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="w-name" placeholder="Ramesh Kumar">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="w-phone" placeholder="9876543210">
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <input type="text" id="w-role" placeholder="Mason, Carpenter...">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Daily Wage (₹)</label>
+        <input type="number" id="w-wage" placeholder="500" oninput="calcWorkerWage()">
+      </div>
+      <div class="form-group">
+        <label>Total Working Days</label>
+        <input type="number" id="w-days" placeholder="20" oninput="calcWorkerWage()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Total Wage Paid (Auto-calculated)</label>
+      <input type="number" id="w-total" placeholder="0" readonly style="opacity:0.7">
+    </div>
+    <div class="form-group">
+      <label>Assign to Project</label>
+      <select id="w-project"><option value="">— None —</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="saveWorker()">Save Worker</button>
+  </div>
+</div>
+
+<!-- Machine Modal -->
+<div class="modal-overlay" id="machine-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">ADD MACHINE</div>
+      <button class="modal-close" onclick="closeModal('machine-modal')">✕</button>
+    </div>
+    <input type="hidden" id="machine-edit-id">
+    <div class="form-group">
+      <label>Machine Name</label>
+      <input type="text" id="m-name" placeholder="Excavator...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <input type="text" id="m-type" placeholder="Heavy, Light...">
+      </div>
+      <div class="form-group">
+        <label>Availability Status</label>
+        <select id="m-status">
+          <option>Available</option><option>In Use</option><option>Under Maintenance</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Assign to Project</label>
+      <select id="m-project"><option value="">— None —</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="saveMachine()">Save Machine</button>
+  </div>
+</div>
+
+<!-- Material Modal -->
+<div class="modal-overlay" id="material-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">ADD MATERIAL</div>
+      <button class="modal-close" onclick="closeModal('material-modal')">✕</button>
+    </div>
+    <input type="hidden" id="mat-edit-id">
+    <div class="form-group">
+      <label>Material Name</label>
+      <input type="text" id="mat-name" placeholder="Cement, Steel...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <input type="text" id="mat-type" placeholder="Structural, Finishing...">
+      </div>
+      <div class="form-group">
+        <label>Unit Cost (₹)</label>
+        <input type="number" id="mat-cost" placeholder="0" oninput="calcMatTotal()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Quantity Available</label>
+        <input type="number" id="mat-qty" placeholder="0" oninput="calcMatTotal()">
+      </div>
+      <div class="form-group">
+        <label>Total Value (Auto)</label>
+        <input type="number" id="mat-total" readonly placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Assign to Project</label>
+      <select id="mat-project"><option value="">— None —</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="saveMaterial()">Save Material</button>
+  </div>
+</div>
+
+<!-- Manager Modal -->
+<div class="modal-overlay" id="manager-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">ADD MANAGER</div>
+      <button class="modal-close" onclick="closeModal('manager-modal')">✕</button>
+    </div>
+    <input type="hidden" id="mgr-edit-id">
+    <div class="form-group">
+      <label>Manager Name</label>
+      <input type="text" id="mgr-name" placeholder="Full name...">
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="text" id="mgr-phone" placeholder="Phone number...">
+    </div>
+    <button class="btn btn-primary" onclick="saveManager()">Save Manager</button>
+  </div>
+</div>
+
+
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// SUPABASE CONFIG — replace with your credentials
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://xrlbrdtatntsbharthpw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_jo4EDFh6tEeaqIhWea22Pw_QDE5AoMQ';
+
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─── AUTH ───────────────────────────────────
+async function login() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('auth-error');
+  err.style.display = 'none';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { err.textContent = error.message; err.style.display = 'block'; return; }
+  launchApp(data.user);
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+function launchApp(user) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('user-email-display').textContent = user.email;
+  loadAll();
+}
+
+// Check existing session
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) launchApp(session.user);
+});
+
+// ─── NAVIGATION ─────────────────────────────
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (btn) btn.classList.add('active');
+  loadPage(page);
+}
+
+function loadPage(page) {
+  switch(page) {
+    case 'dashboard': loadDashboard(); break;
+    case 'projects': loadProjects(); break;
+    case 'workers': loadWorkers(); break;
+    case 'machinery': loadMachinery(); break;
+    case 'materials': loadMaterials(); break;
+    case 'managers': loadManagers(); break;
+    case 'finance': loadFinance(); break;
+    // detail pages loaded by their own functions, no reload needed
+  }
+}
+
+// ─── UTILITIES ──────────────────────────────
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function fmt(n) {
+  if (n == null) return '—';
+  return '₹' + Number(n).toLocaleString('en-IN');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function openModal(id) {
+  // Reset modal title for project modal when opening fresh
+  if (id === 'project-modal' && !document.getElementById('project-edit-id').value) {
+    document.getElementById('project-modal-title').textContent = 'NEW PROJECT';
+  }
+  if (id === 'worker-modal' && !document.getElementById('worker-edit-id').value) {
+    document.getElementById('worker-modal-title').textContent = 'ADD WORKER';
+    document.getElementById('w-id').readOnly = false;
+    document.getElementById('w-id').style.opacity = '1';
+    document.getElementById('w-id').value = '';
+    // Show next suggested ID
+    const maxId = cache.workers.reduce((max, w) => Math.max(max, w.worker_id || 0), 0);
+    document.getElementById('w-id').placeholder = `Next: ${maxId + 1} (auto)`;
+  }
+  populateSelects();
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function badgeStatus(s) {
+  const map = { 'Planned':'badge-planned','Active':'badge-active','Completed':'badge-completed',
+    'Available':'badge-available','In Use':'badge-unavailable','Under Maintenance':'badge-unavailable' };
+  return `<span class="badge ${map[s]||'badge-planned'}">${s}</span>`;
+}
+
+// ─── LOAD ALL ───────────────────────────────
+let cache = { projects:[], workers:[], machinery:[], materials:[], managers:[] };
+
+async function loadAll() {
+  const [p,w,m,mat,mgr] = await Promise.all([
+    sb.from('project').select('*'),
+    sb.from('worker').select('*'),
+    sb.from('machinery').select('*'),
+    sb.from('material').select('*'),
+    sb.from('manager').select('*'),
+  ]);
+  cache.projects = p.data || [];
+  cache.workers = w.data || [];
+  cache.machinery = m.data || [];
+  cache.materials = mat.data || [];
+  cache.managers = mgr.data || [];
+  loadDashboard();
+}
+
+// ─── DASHBOARD ──────────────────────────────
+function loadDashboard() {
+  const totalBudget = cache.projects.reduce((s,p) => s + (p.budget||0), 0);
+  const totalPayroll = cache.workers.reduce((s,w) => s + (w.total_wage_paid||0), 0);
+  const totalMat = cache.materials.reduce((s,m) => s + ((m.unit_cost||0)*(m.quantity_available||0)), 0);
+  const totalExpense = totalPayroll + totalMat;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Projects</div>
+      <div class="stat-value">${cache.projects.length}</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Total Budget</div>
+      <div class="stat-value" style="font-size:28px">${fmt(totalBudget)}</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-value" style="font-size:28px">${fmt(totalExpense)}</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-label">Total Workers</div>
+      <div class="stat-value">${cache.workers.length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Machines</div>
+      <div class="stat-value">${cache.machinery.length}</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Payroll Disbursed</div>
+      <div class="stat-value" style="font-size:28px">${fmt(totalPayroll)}</div>
+    </div>
+  `;
+
+  const recentProj = cache.projects.slice(-5).reverse();
+  document.getElementById('recent-projects').innerHTML = recentProj.length
+    ? recentProj.map(p => `
+      <div class="activity-item">
+        <div class="activity-dot"></div>
+        <div>
+          <div class="activity-text">${p.project_name}</div>
+          <div style="font-size:11px;color:var(--muted)">${fmtDate(p.start_date)} → ${fmtDate(p.end_date)}</div>
+        </div>
+        ${badgeStatus(p.status)}
+      </div>`).join('')
+    : '<div class="empty-state">No projects yet</div>';
+
+  document.getElementById('quick-overview').innerHTML = `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:#4f8ef7"></div>
+      <div class="activity-text">Materials</div>
+      <div class="activity-time">${cache.materials.length} items</div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot" style="background:var(--accent)"></div>
+      <div class="activity-text">Managers</div>
+      <div class="activity-time">${cache.managers.length} on staff</div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot" style="background:var(--success)"></div>
+      <div class="activity-text">Available Machines</div>
+      <div class="activity-time">${cache.machinery.filter(m=>m.availability_status==='Available').length}</div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot" style="background:var(--accent2)"></div>
+      <div class="activity-text">Total Material Cost</div>
+      <div class="activity-time">${fmt(totalMat)}</div>
+    </div>
+  `;
+}
+
+// ─── PROJECTS ───────────────────────────────
+function projName(id) {
+  const p = cache.projects.find(p => p.project_id === id);
+  return p ? p.project_name : id || '—';
+}
+
+function mgrName(id) {
+  const m = cache.managers.find(m => m.manager_id === id);
+  return m ? m.manager_name : '—';
+}
+
+async function loadProjects() {
+  const { data } = await sb.from('project').select('*').order('project_id');
+  cache.projects = data || [];
+  const tbody = document.getElementById('projects-tbody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No projects found</td></tr>'; return; }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${p.project_id}</span></td>
+      <td style="font-weight:600">${p.project_name}</td>
+      <td>${badgeStatus(p.status)}</td>
+      <td>${fmtDate(p.start_date)}</td>
+      <td>${fmtDate(p.end_date)}</td>
+      <td style="color:var(--accent)">${fmt(p.budget)}</td>
+      <td>${mgrName(p.manager_id)}</td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-sm" style="background:rgba(245,166,35,0.15);color:var(--accent);border:1px solid rgba(245,166,35,0.3)" onclick="openProjectDetail(${p.project_id})">⤢ Extend</button>
+        <button class="btn btn-sm btn-outline" onclick="editProject(${p.project_id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecord('project','project_id',${p.project_id},'projects')">Del</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openProjectDetail(projectId) {
+  const p = cache.projects.find(x => x.project_id === projectId);
+  if (!p) return;
+
+  // Set title
+  document.getElementById('detail-title').innerHTML = `${p.project_name.toUpperCase()} <span>DETAIL</span>`;
+
+  // Stats bar
+  const workers = cache.workers.filter(w => w.project_id === projectId);
+  const machinery = cache.machinery.filter(m => m.project_id === projectId);
+  const materials = cache.materials.filter(m => m.project_id === projectId);
+  const totalPayroll = workers.reduce((s, w) => s + (w.total_wage_paid || 0), 0);
+  const totalMat = materials.reduce((s, m) => s + ((m.unit_cost||0)*(m.quantity_available||0)), 0);
+
+  document.getElementById('detail-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Status</div><div style="margin-top:8px">${badgeStatus(p.status)}</div></div>
+    <div class="stat-card blue"><div class="stat-label">Budget</div><div class="stat-value" style="font-size:26px">${fmt(p.budget)}</div></div>
+    <div class="stat-card success"><div class="stat-label">Payroll Spend</div><div class="stat-value" style="font-size:26px">${fmt(totalPayroll)}</div></div>
+    <div class="stat-card"><div class="stat-label">Material Value</div><div class="stat-value" style="font-size:26px">${fmt(totalMat)}</div></div>
+    <div class="stat-card"><div class="stat-label">Timeline</div><div style="margin-top:8px;font-size:13px">${fmtDate(p.start_date)} → ${fmtDate(p.end_date)}</div></div>
+    <div class="stat-card"><div class="stat-label">Manager</div><div style="margin-top:8px;font-size:13px;font-weight:600">${mgrName(p.manager_id)}</div></div>
+  `;
+
+  // Workers table
+  document.getElementById('detail-workers-tbody').innerHTML = workers.length
+    ? workers.map(w => `<tr>
+        <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${w.worker_id}</span></td>
+        <td style="font-weight:600">${w.name}</td>
+        <td>${w.role}</td>
+        <td>${fmt(w.daily_wage)}</td>
+        <td>${w.total_working_days||0} days</td>
+        <td style="color:var(--success);font-weight:600">${fmt(w.total_wage_paid)}</td>
+        <td style="color:var(--muted)">${w.phone||'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty-state">No workers assigned to this project</td></tr>';
+
+  // Machinery table
+  document.getElementById('detail-machinery-tbody').innerHTML = machinery.length
+    ? machinery.map(m => `<tr>
+        <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${m.machine_id}</span></td>
+        <td style="font-weight:600">${m.machine_name}</td>
+        <td>${m.type}</td>
+        <td>${badgeStatus(m.availability_status)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty-state">No machinery assigned to this project</td></tr>';
+
+  // Materials table
+  document.getElementById('detail-materials-tbody').innerHTML = materials.length
+    ? materials.map(m => `<tr>
+        <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${m.material_id}</span></td>
+        <td style="font-weight:600">${m.material_name}</td>
+        <td>${m.type}</td>
+        <td>${fmt(m.unit_cost)}</td>
+        <td>${m.quantity_available}</td>
+        <td style="color:var(--accent);font-weight:600">${fmt((m.unit_cost||0)*(m.quantity_available||0))}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" class="empty-state">No materials assigned to this project</td></tr>';
+
+  // Show detail page
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.getElementById('page-project-detail').classList.add('active');
+}
+
+function populateSelects() {
+  const projOpts = '<option value="">— None —</option>' + cache.projects.map(p => `<option value="${p.project_id}">${p.project_name}</option>`).join('');
+  const mgrOpts = '<option value="">— Select Manager —</option>' + cache.managers.map(m => `<option value="${m.manager_id}">${m.manager_name}</option>`).join('');
+
+  document.getElementById('proj-manager').innerHTML = mgrOpts;
+  document.getElementById('w-project').innerHTML = projOpts;
+  document.getElementById('m-project').innerHTML = projOpts;
+  document.getElementById('mat-project').innerHTML = projOpts;
+}
+
+function populateProjectSelects() { populateSelects(); }
+
+async function saveProject() {
+  const name = document.getElementById('proj-name').value.trim();
+  const status = document.getElementById('proj-status').value;
+  const budget = document.getElementById('proj-budget').value || null;
+  const start = document.getElementById('proj-start').value;
+  const end = document.getElementById('proj-end').value;
+  const mgr = document.getElementById('proj-manager').value || null;
+  const editId = document.getElementById('project-edit-id').value;
+
+  if (!name) { toast('Project name required','error'); return; }
+  if (start && end && end < start) { toast('End date must be after start date','error'); return; }
+
+  const payload = { project_name:name, status, budget, start_date:start||null, end_date:end||null, manager_id:mgr };
+
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('project').update(payload).eq('project_id', editId));
+  } else {
+    ({ error } = await sb.from('project').insert(payload));
+  }
+
+  if (error) { toast(error.message,'error'); return; }
+  toast(editId ? 'Project updated!' : 'Project created!');
+  closeModal('project-modal');
+  document.getElementById('project-edit-id').value = '';
+  document.getElementById('project-modal-title').textContent = 'NEW PROJECT';
+  clearForm(['proj-name','proj-budget','proj-start','proj-end']);
+  await loadAll();
+  loadProjects();
+}
+
+async function editProject(id) {
+  const p = cache.projects.find(x => x.project_id === id);
+  if (!p) return;
+  document.getElementById('project-edit-id').value = id;
+  document.getElementById('project-modal-title').textContent = 'EDIT PROJECT';
+  openModal('project-modal');
+  document.getElementById('proj-name').value = p.project_name;
+  document.getElementById('proj-status').value = p.status;
+  document.getElementById('proj-budget').value = p.budget || '';
+  document.getElementById('proj-start').value = p.start_date || '';
+  document.getElementById('proj-end').value = p.end_date || '';
+  document.getElementById('proj-manager').value = p.manager_id || '';
+}
+
+// ─── WORKERS ────────────────────────────────
+async function loadWorkers() {
+  const { data } = await sb.from('worker').select('*').order('worker_id');
+  cache.workers = data || [];
+  const tbody = document.getElementById('workers-tbody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No workers found</td></tr>'; return; }
+  tbody.innerHTML = data.map(w => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${w.worker_id}</span></td>
+      <td style="font-weight:600">${w.name}</td>
+      <td style="color:var(--muted)">${w.phone||'—'}</td>
+      <td>${w.role}</td>
+      <td>${fmt(w.daily_wage)}</td>
+      <td>${w.total_working_days||0} days</td>
+      <td style="color:var(--success)">${fmt(w.total_wage_paid)}</td>
+      <td>${projName(w.project_id)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editWorker(${w.worker_id})" style="margin-right:6px">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecord('worker','worker_id',${w.worker_id},'workers')">Del</button>
+      </td>
+    </tr>`).join('');
+}
+
+function calcWorkerWage() {
+  const days = parseFloat(document.getElementById('w-days').value) || 0;
+  const wage = parseFloat(document.getElementById('w-wage').value) || 0;
+  document.getElementById('w-total').value = (days * wage).toFixed(2);
+}
+
+async function saveWorker() {
+  const manualId = document.getElementById('w-id').value;
+  const name = document.getElementById('w-name').value.trim();
+  const phone = document.getElementById('w-phone').value.trim();
+  const role = document.getElementById('w-role').value.trim();
+  const wage = parseFloat(document.getElementById('w-wage').value) || 0;
+  const days = parseInt(document.getElementById('w-days').value) || 0;
+  const total = parseFloat(document.getElementById('w-total').value) || (wage * days);
+  const proj = document.getElementById('w-project').value || null;
+  const editId = document.getElementById('worker-edit-id').value;
+
+  if (!name || !role) { toast('Name and role required','error'); return; }
+
+  const payload = { name, phone, role, daily_wage:wage, total_working_days:days, total_wage_paid:total, project_id:proj };
+
+  if (!editId) {
+    // Auto-assign worker_id: max existing + 1, or use manual entry
+    if (manualId) {
+      payload.worker_id = parseInt(manualId);
+    } else {
+      const maxId = cache.workers.reduce((max, w) => Math.max(max, w.worker_id || 0), 0);
+      payload.worker_id = maxId + 1;
+    }
+  }
+
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('worker').update(payload).eq('worker_id', editId));
+  } else {
+    ({ error } = await sb.from('worker').insert(payload));
+  }
+  if (error) { toast(error.message,'error'); return; }
+  toast(editId ? 'Worker updated!' : 'Worker added!');
+  closeModal('worker-modal');
+  clearForm(['w-id','w-name','w-phone','w-role','w-wage','w-days','w-total']);
+  document.getElementById('worker-edit-id').value = '';
+  await loadAll(); loadWorkers();
+}
+
+async function editWorker(id) {
+  const w = cache.workers.find(x => x.worker_id === id);
+  if (!w) return;
+  document.getElementById('worker-edit-id').value = id;
+  document.getElementById('worker-modal-title').textContent = 'EDIT WORKER';
+  openModal('worker-modal');
+  document.getElementById('w-id').value = w.worker_id;
+  document.getElementById('w-id').readOnly = true;
+  document.getElementById('w-id').style.opacity = '0.5';
+  document.getElementById('w-name').value = w.name;
+  document.getElementById('w-phone').value = w.phone || '';
+  document.getElementById('w-role').value = w.role;
+  document.getElementById('w-wage').value = w.daily_wage;
+  document.getElementById('w-days').value = w.total_working_days;
+  document.getElementById('w-total').value = w.total_wage_paid || '';
+  document.getElementById('w-project').value = w.project_id || '';
+}
+
+// ─── MACHINERY ──────────────────────────────
+async function loadMachinery() {
+  const { data } = await sb.from('machinery').select('*').order('machine_id');
+  cache.machinery = data || [];
+  const tbody = document.getElementById('machinery-tbody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No machinery found</td></tr>'; return; }
+  tbody.innerHTML = data.map(m => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${m.machine_id}</span></td>
+      <td style="font-weight:600">${m.machine_name}</td>
+      <td>${m.type}</td>
+      <td>${projName(m.project_id)}</td>
+      <td>${badgeStatus(m.availability_status)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editMachine(${m.machine_id})" style="margin-right:6px">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecord('machinery','machine_id',${m.machine_id},'machinery')">Del</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function saveMachine() {
+  const name = document.getElementById('m-name').value.trim();
+  const type = document.getElementById('m-type').value.trim();
+  const status = document.getElementById('m-status').value;
+  const proj = document.getElementById('m-project').value || null;
+  const editId = document.getElementById('machine-edit-id').value;
+
+  if (!name) { toast('Machine name required','error'); return; }
+  const payload = { machine_name:name, type, availability_status:status, project_id:proj };
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('machinery').update(payload).eq('machine_id', editId));
+  } else {
+    ({ error } = await sb.from('machinery').insert(payload));
+  }
+  if (error) { toast(error.message,'error'); return; }
+  toast('Machine saved!');
+  closeModal('machine-modal');
+  clearForm(['m-name','m-type']);
+  document.getElementById('machine-edit-id').value = '';
+  await loadAll(); loadMachinery();
+}
+
+async function editMachine(id) {
+  const m = cache.machinery.find(x => x.machine_id === id);
+  if (!m) return;
+  document.getElementById('machine-edit-id').value = id;
+  openModal('machine-modal');
+  document.getElementById('m-name').value = m.machine_name;
+  document.getElementById('m-type').value = m.type;
+  document.getElementById('m-status').value = m.availability_status;
+  document.getElementById('m-project').value = m.project_id || '';
+}
+
+// ─── MATERIALS ──────────────────────────────
+async function loadMaterials() {
+  const { data } = await sb.from('material').select('*').order('material_id');
+  cache.materials = data || [];
+  const tbody = document.getElementById('materials-tbody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No materials found</td></tr>'; return; }
+  tbody.innerHTML = data.map(m => {
+    const total = (m.unit_cost||0) * (m.quantity_available||0);
+    return `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${m.material_id}</span></td>
+      <td style="font-weight:600">${m.material_name}</td>
+      <td>${m.type}</td>
+      <td>${projName(m.project_id)}</td>
+      <td>${fmt(m.unit_cost)}</td>
+      <td>${m.quantity_available}</td>
+      <td style="color:var(--accent)">${fmt(total)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editMaterial(${m.material_id})" style="margin-right:6px">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecord('material','material_id',${m.material_id},'materials')">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function calcMatTotal() {
+  const cost = parseFloat(document.getElementById('mat-cost').value) || 0;
+  const qty = parseInt(document.getElementById('mat-qty').value) || 0;
+  document.getElementById('mat-total').value = (cost * qty).toFixed(2);
+}
+
+async function saveMaterial() {
+  const name = document.getElementById('mat-name').value.trim();
+  const type = document.getElementById('mat-type').value.trim();
+  const cost = parseFloat(document.getElementById('mat-cost').value) || 0;
+  const qty = parseInt(document.getElementById('mat-qty').value) || 0;
+  const proj = document.getElementById('mat-project').value || null;
+  const editId = document.getElementById('mat-edit-id').value;
+
+  if (!name) { toast('Material name required','error'); return; }
+  const payload = { material_name:name, type, unit_cost:cost, quantity_available:qty, project_id:proj };
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('material').update(payload).eq('material_id', editId));
+  } else {
+    ({ error } = await sb.from('material').insert(payload));
+  }
+  if (error) { toast(error.message,'error'); return; }
+  toast('Material saved!');
+  closeModal('material-modal');
+  clearForm(['mat-name','mat-type','mat-cost','mat-qty','mat-total']);
+  document.getElementById('mat-edit-id').value = '';
+  await loadAll(); loadMaterials();
+}
+
+async function editMaterial(id) {
+  const m = cache.materials.find(x => x.material_id === id);
+  if (!m) return;
+  document.getElementById('mat-edit-id').value = id;
+  openModal('material-modal');
+  document.getElementById('mat-name').value = m.material_name;
+  document.getElementById('mat-type').value = m.type;
+  document.getElementById('mat-cost').value = m.unit_cost;
+  document.getElementById('mat-qty').value = m.quantity_available;
+  document.getElementById('mat-total').value = (m.unit_cost||0) * (m.quantity_available||0);
+  document.getElementById('mat-project').value = m.project_id || '';
+}
+
+// ─── MANAGERS ───────────────────────────────
+async function loadManagers() {
+  const { data } = await sb.from('manager').select('*').order('manager_id');
+  cache.managers = data || [];
+  const tbody = document.getElementById('managers-tbody');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No managers found</td></tr>'; return; }
+  tbody.innerHTML = data.map(m => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${m.manager_id}</span></td>
+      <td style="font-weight:600">${m.manager_name}</td>
+      <td>${m.phone||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editManager(${m.manager_id})" style="margin-right:6px">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecord('manager','manager_id',${m.manager_id},'managers')">Del</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function saveManager() {
+  const name = document.getElementById('mgr-name').value.trim();
+  const phone = document.getElementById('mgr-phone').value.trim();
+  const editId = document.getElementById('mgr-edit-id').value;
+
+  if (!name) { toast('Manager name required','error'); return; }
+  const payload = { manager_name:name, phone };
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('manager').update(payload).eq('manager_id', editId));
+  } else {
+    ({ error } = await sb.from('manager').insert(payload));
+  }
+  if (error) { toast(error.message,'error'); return; }
+  toast('Manager saved!');
+  closeModal('manager-modal');
+  clearForm(['mgr-name','mgr-phone']);
+  document.getElementById('mgr-edit-id').value = '';
+  await loadAll(); loadManagers();
+}
+
+async function editManager(id) {
+  const m = cache.managers.find(x => x.manager_id === id);
+  if (!m) return;
+  document.getElementById('mgr-edit-id').value = id;
+  openModal('manager-modal');
+  document.getElementById('mgr-name').value = m.manager_name;
+  document.getElementById('mgr-phone').value = m.phone || '';
+}
+
+// ─── FINANCE ────────────────────────────────
+function loadFinance() {
+  const projects = cache.projects;
+
+  // Compute per-project payroll (sum of worker total_wage_paid) and material costs
+  let grandPayroll = 0, grandMaterial = 0, grandTotal = 0;
+
+  const payrollRows = projects.map(p => {
+    const workers = cache.workers.filter(w => w.project_id === p.project_id);
+    const payroll = workers.reduce((s, w) => s + (w.total_wage_paid || 0), 0);
+    grandPayroll += payroll;
+    return { p, workers, payroll };
+  }).filter(r => r.workers.length > 0 || true); // show all projects
+
+  const expenseRows = projects.map(p => {
+    const workers = cache.workers.filter(w => w.project_id === p.project_id);
+    const materials = cache.materials.filter(m => m.project_id === p.project_id);
+    const payroll = workers.reduce((s, w) => s + (w.total_wage_paid || 0), 0);
+    const matCost = materials.reduce((s, m) => s + ((m.unit_cost||0)*(m.quantity_available||0)), 0);
+    const total = payroll + matCost;
+    grandMaterial += matCost;
+    grandTotal += total;
+    return { p, payroll, matCost, total };
+  });
+
+  // Summary stats
+  document.getElementById('finance-totals').innerHTML = `
+    <div class="stat-card success">
+      <div class="stat-label">Total Payroll (All Projects)</div>
+      <div class="stat-value" style="font-size:26px">${fmt(grandPayroll)}</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Total Material Cost</div>
+      <div class="stat-value" style="font-size:26px">${fmt(grandMaterial)}</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-label">Grand Total Expense</div>
+      <div class="stat-value" style="font-size:26px">${fmt(grandTotal)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Projects Tracked</div>
+      <div class="stat-value">${projects.length}</div>
+    </div>
+  `;
+
+  // Payroll table
+  const ptbody = document.getElementById('payroll-tbody');
+  ptbody.innerHTML = payrollRows.length
+    ? payrollRows.map(r => `
+      <tr>
+        <td style="font-weight:600">${r.p.project_name}</td>
+        <td style="color:var(--muted)">${r.workers.length} workers</td>
+        <td style="color:var(--success);font-weight:700">${fmt(r.payroll)}</td>
+        <td>
+          <button class="btn btn-sm" style="background:rgba(245,166,35,0.15);color:var(--accent);border:1px solid rgba(245,166,35,0.3)" onclick="openPayrollDetail(${r.p.project_id})">⤢ Detail</button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty-state">No projects found</td></tr>';
+
+  // Expense table
+  const etbody = document.getElementById('expense-tbody');
+  etbody.innerHTML = expenseRows.length
+    ? expenseRows.map(r => `
+      <tr>
+        <td style="font-weight:600">${r.p.project_name}</td>
+        <td style="color:var(--success)">${fmt(r.payroll)}</td>
+        <td style="color:var(--accent)">${fmt(r.matCost)}</td>
+        <td style="color:var(--danger);font-weight:700">${fmt(r.total)}</td>
+        <td>
+          <button class="btn btn-sm" style="background:rgba(245,166,35,0.15);color:var(--accent);border:1px solid rgba(245,166,35,0.3)" onclick="openExpenseDetail(${r.p.project_id})">⤢ Detail</button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty-state">No projects found</td></tr>';
+}
+
+function openPayrollDetail(projectId) {
+  const p = cache.projects.find(x => x.project_id === projectId);
+  if (!p) return;
+  const workers = cache.workers.filter(w => w.project_id === projectId);
+  const totalPayroll = workers.reduce((s, w) => s + (w.total_wage_paid || 0), 0);
+
+  document.getElementById('payroll-detail-title').innerHTML = `${p.project_name.toUpperCase()} <span>PAYROLL</span>`;
+  document.getElementById('payroll-detail-stats').innerHTML = `
+    <div class="stat-card success"><div class="stat-label">Total Payroll</div><div class="stat-value" style="font-size:28px">${fmt(totalPayroll)}</div></div>
+    <div class="stat-card"><div class="stat-label">Workers</div><div class="stat-value">${workers.length}</div></div>
+    <div class="stat-card blue"><div class="stat-label">Avg Pay / Worker</div><div class="stat-value" style="font-size:28px">${fmt(workers.length ? totalPayroll/workers.length : 0)}</div></div>
+  `;
+  document.getElementById('payroll-detail-tbody').innerHTML = workers.length
+    ? workers.map(w => `<tr>
+        <td><span style="font-family:'DM Mono',monospace;color:var(--muted)">#${w.worker_id}</span></td>
+        <td style="font-weight:600">${w.name}</td>
+        <td>${w.role}</td>
+        <td>${fmt(w.daily_wage)}</td>
+        <td>${w.total_working_days||0} days</td>
+        <td style="color:var(--success);font-weight:700">${fmt(w.total_wage_paid)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" class="empty-state">No workers assigned</td></tr>';
+
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.getElementById('page-payroll-detail').classList.add('active');
+}
+
+function openExpenseDetail(projectId) {
+  const p = cache.projects.find(x => x.project_id === projectId);
+  if (!p) return;
+  const workers = cache.workers.filter(w => w.project_id === projectId);
+  const materials = cache.materials.filter(m => m.project_id === projectId);
+  const totalPayroll = workers.reduce((s, w) => s + (w.total_wage_paid || 0), 0);
+  const totalMat = materials.reduce((s, m) => s + ((m.unit_cost||0)*(m.quantity_available||0)), 0);
+  const grand = totalPayroll + totalMat;
+
+  document.getElementById('expense-detail-title').innerHTML = `${p.project_name.toUpperCase()} <span>EXPENSES</span>`;
+  document.getElementById('expense-detail-stats').innerHTML = `
+    <div class="stat-card success"><div class="stat-label">Payroll Cost</div><div class="stat-value" style="font-size:26px">${fmt(totalPayroll)}</div></div>
+    <div class="stat-card blue"><div class="stat-label">Material Cost</div><div class="stat-value" style="font-size:26px">${fmt(totalMat)}</div></div>
+    <div class="stat-card danger"><div class="stat-label">Total Expense</div><div class="stat-value" style="font-size:26px">${fmt(grand)}</div></div>
+    <div class="stat-card"><div class="stat-label">Budget</div><div class="stat-value" style="font-size:26px">${fmt(p.budget)}</div></div>
+    <div class="stat-card ${grand > (p.budget||0) ? 'danger' : 'success'}">
+      <div class="stat-label">Budget Remaining</div>
+      <div class="stat-value" style="font-size:26px">${fmt((p.budget||0) - grand)}</div>
+    </div>
+  `;
+
+  document.getElementById('exp-detail-workers-tbody').innerHTML = workers.length
+    ? workers.map(w => `<tr>
+        <td style="font-weight:600">${w.name}</td>
+        <td>${w.role}</td>
+        <td>${w.total_working_days||0}</td>
+        <td>${fmt(w.daily_wage)}</td>
+        <td style="color:var(--success);font-weight:700">${fmt(w.total_wage_paid)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty-state">No workers</td></tr>';
+
+  document.getElementById('exp-detail-materials-tbody').innerHTML = materials.length
+    ? materials.map(m => `<tr>
+        <td style="font-weight:600">${m.material_name}</td>
+        <td>${m.type}</td>
+        <td>${fmt(m.unit_cost)}</td>
+        <td>${m.quantity_available}</td>
+        <td style="color:var(--accent);font-weight:700">${fmt((m.unit_cost||0)*(m.quantity_available||0))}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty-state">No materials</td></tr>';
+
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.getElementById('page-expense-detail').classList.add('active');
+}
+
+// ─── DELETE ─────────────────────────────────
+async function deleteRecord(table, pk, id, reload) {
+  if (!confirm('Delete this record?')) return;
+  const { error } = await sb.from(table).delete().eq(pk, id);
+  if (error) { toast(error.message,'error'); return; }
+  toast('Deleted!');
+  await loadAll();
+  if (reload === 'finance') loadFinance();
+  else loadPage(reload);
+}
+
+// ─── HELPERS ────────────────────────────────
+function clearForm(ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// Wage auto-calc on wage input too
+document.getElementById('w-wage').addEventListener('input', calcWorkerWage);
+</script>
+</body>
+</html>
